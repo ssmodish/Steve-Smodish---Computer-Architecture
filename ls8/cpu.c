@@ -50,11 +50,39 @@ void cpu_run(struct cpu *cpu)
   while (running) {
     // TODO
     // 1. Get the value of the current instruction (in address PC).
+    unsigned char instruction = memory[cur_index];
     // 2. Figure out how many operands this next instruction requires
     // 3. Get the appropriate value(s) of the operands following this instruction
     // 4. switch() over it to decide on a course of action.
-    // 5. Do whatever the instruction should do according to the spec.
-    // 6. Move the PC to the next instruction.
+    switch (instruction) {
+      // 5. Do whatever the instruction should do according to the spec.
+      // 6. Move the PC to the next instruction.
+    case PRN:
+      //      * `PRN`: a pseudo-instruction that prints the numeric value stored
+      //      in a register.
+      printf("PRN");
+      printf("%s", cpu->ram[cpu->PC + 1]);
+      cpu->PC += 2;
+      break;
+
+    case LDI:
+      //      * `LDI`: load "immediate", store a value in a register, or "set
+      //      this register to this value".
+      printf("LDI");
+      cpu->ram[cpu->PC + 1] = cpu->ram[cpu->PC + 2];
+      cpu->PC += 3;
+      break;
+
+    case HLT:
+      //      * `HLT`: halt the CPU and exit the emulator.
+      printf("HLT");
+      running = 0;
+      break;
+
+    default:
+      printf("Unknown command");
+      break;
+    }
   }
 }
 
@@ -64,4 +92,10 @@ void cpu_run(struct cpu *cpu)
 void cpu_init(struct cpu *cpu)
 {
   // TODO: Initialize the PC and other special registers
+  cpu->PC = 0;
+  cpu->registers = {0, 0, 0, 0, 0, 0, 0, 0xF4};
+  cpu->ram = {0, 0, 0, 0, 0, 0, 0, 0};
+
+  cpu_load(cpu);
+  cpu_run(cpu);
 }
