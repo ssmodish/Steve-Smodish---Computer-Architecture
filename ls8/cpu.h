@@ -1,15 +1,20 @@
 #ifndef _CPU_H_
 #define _CPU_H_
+#define MEM_SIZE 256
 
 // Holds all information about the CPU
 struct cpu {
-  // TODO
   // PC
   unsigned char PC;
+  //  unsigned char IR;
+  //  unsigned char MAR;
+  //  unsigned char MDR;
+  unsigned char FL;
+
   // registers (array)
-  unsigned char *registers;
+  unsigned char registers[8];
   // ram (array)
-  unsigned char *ram;
+  unsigned char ram[MEM_SIZE];
 };
 
 // ALU operations
@@ -30,7 +35,7 @@ enum alu_op {
 
 // Function declarations
 
-extern void cpu_load(struct cpu *cpu);
+extern void cpu_load(struct cpu *cpu, int argc, char **argv);
 extern void cpu_init(struct cpu *cpu);
 extern void cpu_run(struct cpu *cpu);
 
