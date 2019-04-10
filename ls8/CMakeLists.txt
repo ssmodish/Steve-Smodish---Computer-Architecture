@@ -3,4 +3,4 @@ project(emulator C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(emulator ls8.c)
+add_executable(ls8 ls8.c)

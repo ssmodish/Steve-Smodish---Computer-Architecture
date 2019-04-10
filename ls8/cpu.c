@@ -18,23 +18,7 @@ void cpu_ram_write(struct cpu *cpu, unsigned char MAR, unsigned char MDR) {
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
 void cpu_load(struct cpu *cpu, int argc, char **argv) {
-  //  char data[DATA_LEN] = {
-  //    // From print8.ls8
-  //    0b10000010, // LDI R0,8
-  //    0b00000000,
-  //    0b00001000,
-  //    0b01000111, // PRN R0
-  //    0b00000000,
-  //    0b00000001  // HLT
-  //  };
-  //
-  //  int address = 0;
-  //
-  //  for (int i = 0; i < DATA_LEN; i++) {
-  //    cpu->ram[address++] = data[i];
-  //  }
 
-  // TODO: Replace this with something less hard-coded
   if (argc != 2) {
     printf("Correct usage: ./files file_name.extension\n");
     return;
@@ -72,14 +56,14 @@ void cpu_load(struct cpu *cpu, int argc, char **argv) {
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
-  (void)cpu;
-  (void)regA;
-  (void)regB;
+  //  (void)cpu;
+  //  (void)regA;
+  //  (void)regB;
 
   switch (op) {
     case ALU_MUL:
-      // TODO
-      break;
+    cpu->registers[0] = cpu->registers[regA] * cpu->registers[regB];
+    break;
 
     // TODO: implement more ALU ops
   }
@@ -100,10 +84,13 @@ void cpu_run(struct cpu *cpu)
     // 3. Get the appropriate value(s) of the operands following this instruction
     unsigned char operand0 = cpu_ram_read(cpu, cpu->PC + 1);
     unsigned char operand1 = cpu_ram_read(cpu, cpu->PC + 2);
-    // 4. switch() over it to decide on a course of action.
-    // 5. Do whatever the instruction should do according to the spec.
-    // 6. Move the PC to the next instruction.
+
     switch (IR) {
+    case MUL:
+      alu(cpu, ALU_MUL, operand0, operand1);
+      cpu->PC += 3;
+      break;
+
     case LDI:
       cpu->registers[operand0] = operand1;
       cpu->PC += 3;
@@ -116,6 +103,18 @@ void cpu_run(struct cpu *cpu)
 
     case HLT:
       running = 0;
+      break;
+
+    case PUSH:
+      cpu->registers[7] -= 1;
+      cpu->ram[cpu->registers[7]] = cpu->registers[cpu->ram[cpu->PC + 1]];
+      cpu->PC += 2;
+      break;
+
+    case POP:
+      cpu->registers[cpu->ram[cpu->PC + 1]] = cpu->ram[cpu->registers[7]];
+      cpu->registers[7] += 1;
+      cpu->PC += 2;
       break;
 
     default:
@@ -132,24 +131,11 @@ void cpu_init(struct cpu *cpu)
 {
   // TODO: Initialize the PC and other special registers
   // initialize PC to 0
-  cpu->PC = 0;
-  cpu->FL = 0;
-  //  cpu->IR = 0;
-  //  cpu->MAR = 0;
-  //  cpu->MDR = 0;
+  cpu->PC = 0; // Program Counter
+  cpu->SP = 0xF4;
 
-  // initialize first 7 registers to 0
-  //  for (int i = 0; i < 7; i++) {
-  //    cpu->registers[i] = 0;
-  //  }
   memset(cpu->registers, 0x00, 7 * sizeof(unsigned char));
-  // initialize last register to 0xF4
   cpu->registers[7] = 0xF4;
-
-  // initialize memory to 0
-  //  for (int j = 0; j < MEM_SIZE; j++) {
-  //    cpu->ram[j] = 0;
-  //  }
 
   memset(cpu->ram, 0x00, 256 * sizeof(unsigned char));
 }
