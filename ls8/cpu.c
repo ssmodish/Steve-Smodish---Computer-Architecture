@@ -56,16 +56,14 @@ void cpu_load(struct cpu *cpu, int argc, char **argv) {
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
-  //  (void)cpu;
-  //  (void)regA;
-  //  (void)regB;
-
   switch (op) {
-    case ALU_MUL:
+  case ALU_MUL:
     cpu->registers[0] = cpu->registers[regA] * cpu->registers[regB];
     break;
 
-    // TODO: implement more ALU ops
+  case ALU_ADD:
+    cpu->registers[0] = cpu->registers[regA] + cpu->registers[regB];
+    break;
   }
 }
 
@@ -88,6 +86,11 @@ void cpu_run(struct cpu *cpu)
     switch (IR) {
     case MUL:
       alu(cpu, ALU_MUL, operand0, operand1);
+      cpu->PC += 3;
+      break;
+
+    case ADD:
+      alu(cpu, ALU_ADD, operand0, operand1);
       cpu->PC += 3;
       break;
 
@@ -115,6 +118,22 @@ void cpu_run(struct cpu *cpu)
       cpu->registers[cpu->ram[cpu->PC + 1]] = cpu->ram[cpu->registers[7]];
       cpu->registers[7] += 1;
       cpu->PC += 2;
+      break;
+
+    case CALL:
+      printf("CALL\n");
+      cpu->registers[7]--;
+      cpu->ram[cpu->registers[7]] = cpu->PC + 2;
+      printf("cpu->PC = %d\n", cpu->PC);
+      cpu->PC = cpu->registers[cpu->ram[cpu->PC + 1]];
+      printf("cpu->PC = %d\n", cpu->PC);
+      printf("cpu->ram[cpu->registers[7]] = %d\n", cpu->ram[cpu->registers[7]]);
+      break;
+
+    case RET:
+      printf("RET\n");
+      cpu->PC = cpu->ram[cpu->registers[7]];
+      cpu->registers[7]++;
       break;
 
     default:
